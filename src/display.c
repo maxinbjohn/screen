@@ -36,6 +36,7 @@
 #include <sys/ioctl.h>
 #include <stdbool.h>
 #include <stdint.h>
+#include <uniconv.h>
 
 #include "screen.h"
 
@@ -2258,7 +2259,8 @@ static void disp_writeev_fn(Event *event, void *data)
 static void disp_readev_fn(Event *event, void *data)
 {
 	ssize_t size;
-	char buf[IOSIZE];
+	char buf[IOSIZE];		/* input buffer */
+	uint32_t imgbuf[IOSIZE];	/* after decoding to internal representation */
 	Canvas *cv;
 
 	(void)event; /* unused */
@@ -2377,7 +2379,13 @@ static void disp_readev_fn(Event *event, void *data)
 			size -= 5;
 		}
 	}
-	(*D_processinput) (buf, size);
+
+	const char * lc = locale_charset();
+	size_t sss= size;
+
+	u32_conv_from_encoding(lc, iconveh_question_mark, buf, sss, 0, imgbuf, &sss);
+
+	(*D_processinput) (imgbuf, size);
 }
 
 static void disp_status_fn(Event *event, void *data)
@@ -2443,7 +2451,7 @@ static void disp_map_fn(Event *event, void *data)
 		p += q[2];
 	} else
 		D_dontmap = 1;
-	ProcessInput(p, l);
+	ProcessInput((uint32_t *)p, l);
 }
 
 static void disp_idle_fn(Event *event, void *data)

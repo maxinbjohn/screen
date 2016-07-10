@@ -222,7 +222,7 @@ process.o: process.c config.h screen.h os.h ansi.h sched.h acls.h comm.h \
 display.o: display.c config.h screen.h os.h ansi.h sched.h acls.h comm.h \
  layer.h term.h image.h canvas.h display.h layout.h viewport.h window.h \
  logfile.h winmsg.h winmsgbuf.h winmsgcond.h backtick.h mark.h \
- misc.h process.h pty.h resize.h termcap.h tty.h
+ misc.h process.h pty.h resize.h termcap.h tty.h 
 comm.o: comm.c config.h os.h screen.h ansi.h sched.h acls.h comm.h \
  layer.h term.h image.h canvas.h display.h layout.h viewport.h window.h \
  logfile.h

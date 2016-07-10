@@ -4,8 +4,8 @@
 #include "winmsgbuf.h"
 
 void  InitKeytab (void);
-void  ProcessInput (char *, int);
-void  ProcessInput2 (char *, int);
+void  ProcessInput (uint32_t *, int);
+void  ProcessInput2 (uint32_t *, int);
 void  DoProcess (Window *, char **, size_t *, struct paster *);
 void  DoAction  (struct action *, int);
 int   FindCommnr (const char *);

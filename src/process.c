@@ -598,7 +598,7 @@ static void ClearAction(struct action *act)
  *  everything else on to ProcessInput2.
  */
 
-void ProcessInput(char *ibuf, int ilen)
+void ProcessInput(uint32_t *ibuf, int ilen)
 {
 	int ch, slen;
 	unsigned char *s, *q;
@@ -636,14 +636,14 @@ void ProcessInput(char *ibuf, int ilen)
 					i = q[0] << 8 | q[1];
 					i &= ~KMAP_NOTIMEOUT;
 					if (StuffKey(i))
-						ProcessInput2((char *)q + 3, q[2]);
+						ProcessInput2((uint32_t *)q + 3, q[2]);
 					if (display == 0)
 						return;
 					l -= q[2];
 					p += q[2];
 				} else
 					D_dontmap = 1;
-				ProcessInput(p, l);
+				ProcessInput((uint32_t *)p, l);
 				if (display == 0)
 					return;
 				evdeq(&D_mapev);
@@ -658,7 +658,7 @@ void ProcessInput(char *ibuf, int ilen)
 					return;
 				D_seqh = 0;
 			}
-			ibuf = (char *)s;
+			ibuf = (uint32_t *)s;
 			slen = ilen;
 			D_seqp++;
 			l = D_seql;
@@ -678,7 +678,7 @@ void ProcessInput(char *ibuf, int ilen)
 				D_seqp = D_kmaps + 3;
 				D_seqh = 0;
 				if (StuffKey(i))
-					ProcessInput2(p, l);
+					ProcessInput2((uint32_t *)p, l);
 				if (display == 0)
 					return;
 			}
@@ -704,7 +704,7 @@ void ProcessInput(char *ibuf, int ilen)
  *  Here only the screen escape commands are handled.
  */
 
-void ProcessInput2(char *ibuf, int ilen)
+void ProcessInput2(uint32_t *ibuf, int ilen)
 {
 	char *s;
 	int ch;
@@ -715,7 +715,7 @@ void ProcessInput2(char *ibuf, int ilen)
 		flayer = D_forecv->c_layer;
 		fore = D_fore;
 		slen = ilen;
-		s = ibuf;
+		s = (char *)ibuf;
 		if (!D_ESCseen) {
 			while (ilen > 0) {
 				if ((unsigned char)*s++ == D_user->u_Esc)
@@ -724,7 +724,7 @@ void ProcessInput2(char *ibuf, int ilen)
 			}
 			slen -= ilen;
 			if (slen)
-				DoProcess(fore, &ibuf, &slen, 0);
+				DoProcess(fore, (char **)&ibuf, &slen, 0);
 			if (--ilen == 0) {
 				D_ESCseen = ktab;
 				WindowChanged(fore, WINESC_ESC_SEEN);
@@ -752,7 +752,7 @@ void ProcessInput2(char *ibuf, int ilen)
 
 		if (ch >= 0)
 			DoAction(&ktabp[ch], ch);
-		ibuf = (char *)(s + 1);
+		ibuf = (uint32_t*)(s + 1);
 		ilen--;
 	}
 }
@@ -4903,7 +4903,7 @@ static void process_fn(char *buf, size_t len, void *data)
 		return;
 	}
 	if (pp->buf) {
-		ProcessInput(pp->buf, pp->len);
+		ProcessInput((uint32_t *)pp->buf, pp->len);
 		return;
 	}
 	Msg(0, "Empty register.");
