@@ -598,10 +598,11 @@ static void ClearAction(struct action *act)
  *  everything else on to ProcessInput2.
  */
 
-void ProcessInput(uint32_t *ibuf, int ilen)
+void ProcessInput(uint32_t *ibuf, size_t ilen)
 {
-	int ch, slen;
-	unsigned char *s, *q;
+	size_t slen;
+	uint32_t ch;
+	uint32_t *s, *q;
 	int i, l;
 	char *p;
 
@@ -610,7 +611,7 @@ void ProcessInput(uint32_t *ibuf, int ilen)
 	if (D_seql)
 		evdeq(&D_mapev);
 	slen = ilen;
-	s = (unsigned char *)ibuf;
+	s = ibuf;
 	while (ilen-- > 0) {
 		ch = *s++;
 		if (D_dontmap || !D_nseqs) {
@@ -704,21 +705,23 @@ void ProcessInput(uint32_t *ibuf, int ilen)
  *  Here only the screen escape commands are handled.
  */
 
-void ProcessInput2(uint32_t *ibuf, int ilen)
+void ProcessInput2(uint32_t *ibuf, size_t ilen)
 {
-	char *s;
+	uint32_t *s;
 	int ch;
 	size_t slen;
 	struct action *ktabp;
 
-	while (ilen && display) {
+	if (display == 0)
+		return;
+	while (ilen) {
 		flayer = D_forecv->c_layer;
 		fore = D_fore;
 		slen = ilen;
-		s = (char *)ibuf;
+		s = ibuf;
 		if (!D_ESCseen) {
 			while (ilen > 0) {
-				if ((unsigned char)*s++ == D_user->u_Esc)
+				if (*s++ == D_user->u_Esc)
 					break;
 				ilen--;
 			}
@@ -757,7 +760,7 @@ void ProcessInput2(uint32_t *ibuf, int ilen)
 	}
 }
 
-void DoProcess(Window *window, char **bufp, size_t *lenp, struct paster *pa)
+void DoProcess(Window *window, uint32_t **bufp, size_t *lenp, struct paster *pa)
 {
 	size_t oldlen;
 	Display *d = display;
@@ -1376,7 +1379,6 @@ void DoAction(struct action *act, int key)
 			if (args[1] && args[1][0]) {
 				user->u_plop.buf = SaveStrn(args[1], argl[1]);
 				user->u_plop.len = argl[1];
-				user->u_plop.enc = i;
 			}
 		} else {
 			struct plop *plp = plop_tab + (int)(unsigned char)ch;
@@ -4867,7 +4869,6 @@ static void copy_reg_fn(char *buf, size_t len, void *data)
 		memmove(pp->buf, D_user->u_plop.buf, D_user->u_plop.len);
 	}
 	pp->len = D_user->u_plop.len;
-	pp->enc = D_user->u_plop.enc;
 	Msg(0, "Copied %d characters into register %c", D_user->u_plop.len, *buf);
 }
 

@@ -31,6 +31,8 @@
 
 #include "os.h"
 
+#include <stdint.h>
+
 /* three known bits: */
 #define ACL_EXEC 0		
 #define ACL_WRITE 1
@@ -63,9 +65,8 @@ struct aclusergroup
  */
 
 struct plop {
-	char *buf;
-	int len;
-	int enc;
+	uint32_t *buf;
+	size_t len;
 };
 
 /*
@@ -75,15 +76,15 @@ struct plop {
  */
 typedef struct acluser
 {
-  struct acluser *u_next;		/* continue the main user list */
-  char u_name[MAXLOGINLEN + 1];		/* login name how he showed up */
-  int  u_detachwin;		/* the window where he last detached */
-  int  u_detachotherwin;	/* window that was "other" when he detached */
-  int  u_Esc, u_MetaEsc;	/* the users screen escape character */
-  struct plop u_plop;
-  int u_id;			/* a uniq index in the bitfields. */
-  AclBits u_umask_w_bits[ACL_BITS_PER_WIN];	/* his window create umask */
-  struct aclusergroup *u_group;	/* linked list of pointers to other users */
+	struct acluser *u_next;		/* continue the main user list */
+	char u_name[MAXLOGINLEN + 1];		/* login name how he showed up */
+	int  u_detachwin;			/* the window where he last detached */
+	int  u_detachotherwin;		/* window that was "other" when he detached */
+	uint32_t	u_Esc, u_MetaEsc;	/* the users screen escape character */
+	struct plop u_plop;
+	int u_id;				/* a uniq index in the bitfields. */
+	AclBits u_umask_w_bits[ACL_BITS_PER_WIN];	/* his window create umask */
+	struct aclusergroup *u_group;		/* linked list of pointers to other users */
 } User;
 
 

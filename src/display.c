@@ -92,7 +92,7 @@ int focusminwidth, focusminheight;
  *  Default layer management
  */
 
-void DefProcess(char **bufp, size_t *lenp)
+void DefProcess(uint32_t **bufp, size_t *lenp)
 {
 	*bufp += *lenp;
 	*lenp = 0;
@@ -2314,14 +2314,14 @@ static void disp_readev_fn(Event *event, void *data)
 		return;
 	}
 	if (D_blocked > 1) {	/* 2, 3 */
-		char *bufp;
+		uint32_t *bufp;
 		Window *p;
 
 		flayer = 0;
 		for (p = windows; p; p = p->w_next)
 			if (p->w_zdisplay == display) {
 				flayer = &p->w_layer;
-				bufp = buf;
+				bufp = buf;	/* XXX TODO  this seems suspicious? should we convert bug before LayProcess? */
 				while (size > 0)
 					LayProcess(&bufp, (size_t*)&size);
 				return;
@@ -2382,9 +2382,15 @@ static void disp_readev_fn(Event *event, void *data)
 
 	const char * lc = locale_charset();
 	size_t sss= size;
+	FILE *df = fopen("/tmp/debug", "a+");
 
 	u32_conv_from_encoding(lc, iconveh_question_mark, buf, sss, 0, imgbuf, &sss);
 
+	for (size_t is = 0; is < sss; is++) {
+		fprintf(df, "%c - %x\n", imgbuf[is], imgbuf[is]);
+	}
+
+	fclose(df);
 	(*D_processinput) (imgbuf, size);
 }
 
